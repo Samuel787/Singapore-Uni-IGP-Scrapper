@@ -1,5 +1,8 @@
 from bs4 import BeautifulSoup
 import requests
+import xlsxwriter
+
+year = "2020"
 
 def nus_scrap_data():
     source = requests.get("http://www.nus.edu.sg/oam/undergraduate-programmes/indicative-grade-profile-(igp)").text
@@ -40,5 +43,28 @@ def nus_scrap_data():
 
     print(result)
     print("------------ end report ------------------")
+    return result
 
-nus_scrap_data()
+def write_nus(result):
+    #create file (workbook) and worksheet   
+    outWorkbook = xlsxwriter.Workbook("nus_igp"+year+".xlsx")
+    outSheet = outWorkbook.add_worksheet()
+
+    #write headers
+    outSheet.write(0,0, "Course name")
+    outSheet.write(0,1, "90th")
+    outSheet.write(0,2, "10th")
+
+    row = 1
+    pos = 0
+    for x in result:
+        for y in x:
+            pos = pos % 3
+            outSheet.write(row, pos, y)
+            pos += 1
+        row += 1
+    
+    outWorkbook.close()
+
+result = nus_scrap_data()
+write_nus(result)
